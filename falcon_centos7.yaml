@@ -1,0 +1,32 @@
+---
+- name: Install and start falcon-sensor
+  hosts: falcon
+  become: true
+
+  tasks:
+  - name: Check if package is installed
+    command: rpm -q falcon-sensor
+    register: package_check
+    ignore_errors: true
+
+  - name: Copy package to host
+    copy:
+      src: /etc/ansible/packages/falcon-sensor-6.54.0-15110.el7.x86_64.rpm
+      dest: /tmp/falcon-sensor-6.54.0-15110.el7.x86_64.rpm
+    when: package_check.rc != 0
+
+  - name: Install package if not installed
+    yum:
+      name: /tmp/falcon-sensor-6.54.0-15110.el7.x86_64.rpm
+      state: present
+    when: package_check.rc != 0
+    register: package_install
+
+  - name: Register falcon agent using falconctl
+    command: /opt/CrowdStrike/falconctl -s --cid=30D84279A6D5460CBB9523A9133D82CF-B3
+    when: package_install is defined and package_install.changed
+
+  - name: Start falcon-sensor service
+    systemd:
+      name: falcon-sensor
+      state: started
