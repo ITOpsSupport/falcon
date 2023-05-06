@@ -23,7 +23,7 @@
     register: package_install
 
   - name: Register falcon agent using falconctl
-    command: /opt/CrowdStrike/falconctl -s --cid=30D84279A6D5460CBB9523A9133D82CF-B3
+    command: /opt/CrowdStrike/falconctl -s --cid=xxxxxxxxxxxxxxxxxxxx
     when: package_install is defined and package_install.changed
 
   - name: Start falcon-sensor service
